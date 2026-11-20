@@ -1,0 +1,15 @@
+# Konce řádků: Git sám normalizuje textové soubory.
+* text=auto
+
+# Bash skripty musí mít LF, jinak v Linuxu, WSL a Cloud Shellu spadnou na znaku \r.
+*.sh text eol=lf
+
+# Windows skripty potřebují CRLF.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binární soubory
+*.jar binary
+*.png binary
+*.ico binary

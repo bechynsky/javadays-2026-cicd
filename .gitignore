@@ -1,0 +1,21 @@
+# Výstupy buildu – do Gitu nepatří
+target/
+*.class
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.settings/
+.project
+.classpath
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lokální tajemství
+.env
+*.pem

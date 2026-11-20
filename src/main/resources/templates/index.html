@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="cs" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>JavaDays 2026 · CI/CD demo</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body th:style="'--accent:' + ${info.themeColor()}">
+
+<header class="hero">
+    <p class="eyebrow">JavaDays 2026 · CI/CD demo</p>
+    <h1 th:text="${greeting}">Ahoj, JavaDays 2026!</h1>
+    <p class="lead">Tuhle stránku postavil, otestoval a nasadil GitHub Actions – bez ručního klikání.</p>
+</header>
+
+<main class="grid">
+    <section class="card">
+        <span class="label">Verze</span>
+        <strong th:text="${info.version()}">1.0.0</strong>
+    </section>
+    <section class="card">
+        <span class="label">Build</span>
+        <strong th:text="'#' + ${info.buildNumber()}">#local</strong>
+    </section>
+    <section class="card">
+        <span class="label">Commit</span>
+        <strong th:text="${info.commit()}">local</strong>
+    </section>
+    <section class="card">
+        <span class="label">Prostředí</span>
+        <strong th:text="${info.environment()}">local</strong>
+    </section>
+    <section class="card">
+        <span class="label">Java</span>
+        <strong th:text="${info.javaVersion()}">25</strong>
+    </section>
+    <!-- DEMO krok 3: sem přidáte kartu Monitoring -->
+</main>
+
+<form class="say-hi" action="/" method="get">
+    <label for="name">Pozdravit někoho jiného:</label>
+    <input id="name" name="name" placeholder="Tvoje jméno" autocomplete="off">
+    <button type="submit">Pozdravit</button>
+</form>
+
+<footer>
+    API: <a href="/api/info">/api/info</a> ·
+    <a href="/api/greeting?name=Praha">/api/greeting</a> ·
+    <a href="/actuator/health">/actuator/health</a>
+</footer>
+</body>
+</html>

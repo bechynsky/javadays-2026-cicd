@@ -1,0 +1,85 @@
+# CI: běží na každém pull requestu do main
+# - build a testy aplikace (mvn -B verify)
+# - kompilace Bicep šablony
+# - what-if: náhled, co by se v Azure změnilo (jen když je Azure nastavený)
+name: CI
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: microsoft
+          java-version: '25'
+          cache: maven
+
+      - name: Build a testy
+        run: mvn -B verify
+
+      - name: Uložit výsledky testů
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: target/surefire-reports/
+          if-no-files-found: ignore
+
+  bicep-lint:
+    name: Bicep lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Kompilace Bicep šablony
+        run: |
+          az bicep install
+          az bicep build --file infra/main.bicep --stdout > /dev/null
+          az bicep build-params --file infra/main.bicepparam --stdout > /dev/null
+          echo "Bicep šablona je v pořádku ✅"
+
+  what-if:
+    name: Bicep what-if
+    needs: bicep-lint
+    # Jen pro PR z tohoto repozitáře (ne z forku) a jen když je Azure nastavený
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && vars.AZURE_CLIENT_ID != ''
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # OIDC token pro přihlášení do Azure
+      contents: read
+    env:
+      AZURE_CORE_NO_COLOR: 'true'
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Přihlášení do Azure (OIDC, bez hesla)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Náhled změn v Azure
+        run: |
+          az deployment group what-if \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --template-file infra/main.bicep \
+            --parameters infra/main.bicepparam \
+            --exclude-change-types NoChange Ignore | tee what-if.txt
+          {
+            echo "## Bicep what-if – co se v Azure změní"
+            echo '```'
+            cat what-if.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
