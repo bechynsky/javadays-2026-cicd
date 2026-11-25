@@ -10,6 +10,6 @@ public class GreetingService {
 
     public String greet(String name) {
         String who = (name == null || name.isBlank()) ? DEFAULT_NAME : name.strip();
-        return "Ahoj, " + who + "!";
+        return "Nazdar, " + who + "!";
     }
 }
