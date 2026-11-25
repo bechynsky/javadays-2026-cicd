@@ -11,7 +11,7 @@ class GreetingServiceTest {
     /** DEMO krok 2: změna "Ahoj" bez úpravy tohoto testu shodí CI. */
     @Test
     void greetsByName() {
-        assertEquals("Ahoj, Eva!", service.greet("Eva"));
+        assertEquals("Nazdar, Eva!", service.greet("Eva"));
     }
 
     @Test
